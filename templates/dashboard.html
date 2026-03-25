@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Dashboard</h2>
+
+<p>Total Sales: ${{ total_sales }}</p>
+<p>Total Profit: ${{ total_profit }}</p>
+
+<canvas id="salesChart"></canvas>
+
+<script>
+    const ctx = document.getElementById('salesChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|tojson }},
+            datasets: [
+                {
+                    label: 'Sales',
+                    data: {{ sales_data|tojson }},
+                    borderWidth: 2
+                },
+                {
+                    label: 'Profit',
+                    data: {{ profit_data|tojson }},
+                    borderWidth: 2
+                }
+            ]
+        }
+    });
+</script>
+
+<h3>🔥 Best Selling Products</h3>
+
+<ul>
+    {% for name, qty in best_products %}
+        <li>{{ name }} - {{ qty }} sold</li>
+    {% endfor %}
+</ul>
+
+<a href="/report">Download PDF Report</a>
+
+<a href="/">Back</a>
+
+</body>
+</html>
