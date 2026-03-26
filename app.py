@@ -1,62 +1,185 @@
+from flask import Flask, render_template, request, redirect, send_file, session
+from models import User, db, Product, Sale
+from sqlalchemy import func
+import io
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from flask import send_file
-import io
-from flask import Flask, render_template, request, redirect
-from models import db, Product, Sale
-from sqlalchemy import func
+import os
+from collections import Counter
+from functools import wraps
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.secret_key = "supersecretkey"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL',
+    'sqlite:///database.db'
+)
+
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-# Home Page
-@app.route('/')
-def index():
-    products = Product.query.all()
-    return render_template('index.html', products=products)
+# ================= LOGIN REQUIRED =================
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get('user_id'):
+            return redirect('/login')
+        return func(*args, **kwargs)
+    return wrapper
 
-# Add Product
+
+# ================= DASHBOARD =================
+@app.route('/')
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    user_id = session.get('user_id')
+
+    products = Product.query.filter_by(user_id=user_id).all()
+    sales = Sale.query.filter_by(user_id=user_id).all()
+
+    total_sales = sum(s.total_price for s in sales)
+    total_profit = sum(s.profit for s in sales)
+
+    dates = [s.date.strftime("%Y-%m-%d") for s in sales]
+    sales_data = [s.total_price for s in sales]
+
+    low_stock = len([p for p in products if p.quantity <= p.min_stock])
+
+    # BEST SELLER
+    product_sales = Counter()
+    for s in sales:
+        product = Product.query.get(s.product_id)
+        if product:
+            product_sales[product.name] += s.quantity_sold
+
+    best_product = max(product_sales, key=product_sales.get) if product_sales else "N/A"
+
+    # INSIGHT
+    insight = "Good performance"
+    if total_profit > 100:
+        insight = "🔥 Strong profit growth!"
+    elif total_profit < 20:
+        insight = "⚠️ Profit is low, increase sales"
+
+    return render_template(
+        "dashboard.html",
+        total_sales=total_sales,
+        total_profit=total_profit,
+        dates=dates,
+        sales_data=sales_data,
+        low_stock=low_stock,
+        products=products,
+        best_product=best_product,
+        insight=insight
+    )
+
+
+# ================= LOGIN =================
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = User.query.filter_by(
+            username=request.form['username'],
+            password=request.form['password']
+        ).first()
+
+        if user:
+            session['user_id'] = user.id
+            return redirect('/dashboard')
+
+    return render_template("login.html")
+
+
+# ================= REGISTER =================
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        user = User(
+            username=request.form['username'],
+            password=request.form['password']
+        )
+        db.session.add(user)
+        db.session.commit()
+        return redirect('/login')
+
+    return render_template("register.html")
+
+
+# ================= LOGOUT =================
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
+
+
+# ================= STOCK =================
+@app.route('/stock')
+@login_required
+def stock():
+    user_id = session.get('user_id')
+    products = Product.query.filter_by(user_id=user_id).all()
+    return render_template("stock.html", products=products)
+
+
+# ================= SALES =================
+@app.route('/sales')
+@login_required
+def sales_page():
+    user_id = session.get('user_id')
+    products = Product.query.filter_by(user_id=user_id).all()
+    return render_template("sales.html", products=products)
+
+
+# ================= REPORTS =================
+@app.route('/reports')
+@login_required
+def reports():
+    return render_template("reports.html")
+
+
+# ================= ADD PRODUCT =================
 @app.route('/add_product', methods=['POST'])
+@login_required
 def add_product():
+    user_id = session.get('user_id')
+
     name = request.form['name']
     buying_price = float(request.form['buying_price'])
     selling_price = float(request.form['selling_price'])
     quantity = int(request.form['quantity'])
     min_stock = int(request.form['min_stock'])
 
-    # Check if product already exists
-    existing_product = Product.query.filter_by(name=name).first()
+    existing = Product.query.filter_by(name=name, user_id=user_id).first()
 
-    if existing_product:
-        # Restock instead of creating new
-        existing_product.quantity += quantity
-        existing_product.buying_price = buying_price
-        existing_product.selling_price = selling_price
+    if existing:
+        existing.quantity += quantity
     else:
-        # Create new product
         product = Product(
             name=name,
             buying_price=buying_price,
             selling_price=selling_price,
             quantity=quantity,
-            min_stock=min_stock
+            min_stock=min_stock,
+            user_id=user_id
         )
         db.session.add(product)
 
     db.session.commit()
-    return redirect('/')
+    return redirect('/stock')
 
-# Record Sale
+
+# ================= SELL =================
 @app.route('/sell/<int:id>', methods=['POST'])
+@login_required
 def sell(id):
     product = Product.query.get(id)
     qty = int(request.form['quantity'])
 
-    if product.quantity >= qty:
+    if product and product.quantity >= qty:
         product.quantity -= qty
 
         total = qty * product.selling_price
@@ -66,76 +189,55 @@ def sell(id):
             product_id=id,
             quantity_sold=qty,
             total_price=total,
-            profit=profit
+            profit=profit,
+            user_id=session.get('user_id')
         )
 
         db.session.add(sale)
         db.session.commit()
 
-    return redirect('/')
+    return redirect('/sales')
 
-# Dashboard
-@app.route('/dashboard')
-def dashboard():
-    sales = Sale.query.all()
 
-    total_sales = sum(s.total_price for s in sales)
-    total_profit = sum(s.profit for s in sales)
-
-    # Chart data
-    dates = [s.date.strftime("%Y-%m-%d") for s in sales]
-    sales_data = [s.total_price for s in sales]
-    profit_data = [s.profit for s in sales]
-
-    # Best-selling products
-    best_products = db.session.query(
-        Product.name,
-        func.sum(Sale.quantity_sold)
-    ).join(Sale).group_by(Product.name).all()
-
-    return render_template(
-        'dashboard.html',
-        total_sales=total_sales,
-        total_profit=total_profit,
-        dates=dates,
-        sales_data=sales_data,
-        profit_data=profit_data,
-        best_products=best_products
-    )
-
-#Restock    
+# ================= RESTOCK =================
 @app.route('/restock/<int:id>', methods=['POST'])
+@login_required
 def restock(id):
     product = Product.query.get(id)
     qty = int(request.form['quantity'])
 
-    product.quantity += qty
-    db.session.commit()
+    if product:
+        product.quantity += qty
+        db.session.commit()
 
-    return redirect('/')
+    return redirect('/stock')
 
-#Delete
+
+# ================= DELETE =================
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
     product = Product.query.get(id)
-    db.session.delete(product)
-    db.session.commit()
-    return redirect('/')
+    if product:
+        db.session.delete(product)
+        db.session.commit()
+    return redirect('/stock')
 
-#Report
+
+# ================= PDF REPORT =================
 @app.route('/report')
-def generate_report():
+@login_required
+def report():
     buffer = io.BytesIO()
-
     doc = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
 
     elements = []
-
     elements.append(Paragraph("MktIntel Financial Report", styles['Title']))
     elements.append(Spacer(1, 10))
 
-    sales = Sale.query.all()
+    user_id = session.get('user_id')
+    sales = Sale.query.filter_by(user_id=user_id).all()
 
     total_sales = sum(s.total_price for s in sales)
     total_profit = sum(s.profit for s in sales)
@@ -144,10 +246,10 @@ def generate_report():
     elements.append(Paragraph(f"Total Profit: ${total_profit}", styles['Normal']))
 
     doc.build(elements)
-
     buffer.seek(0)
 
     return send_file(buffer, as_attachment=True, download_name="report.pdf")
 
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

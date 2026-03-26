@@ -1,52 +1,246 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>MktIntel</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    background: linear-gradient(180deg, #0b1220, #020617);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* HEADER */
+h4 {
+    font-weight: 600;
+}
+
+/* CARDS */
+.card {
+    background: #111827;
+    border-radius: 16px;
+    padding: 15px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* METRICS */
+.metric {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.small-text {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ALERT */
+.alert-box {
+    background: #1f2937;
+    border-left: 4px solid #f59e0b;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+/* BUTTONS */
+.btn {
+    border-radius: 10px;
+}
+
+/* MOBILE NAV (DEFAULT) */
+.navbar-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #020617;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    border-top: 1px solid #1f2937;
+}
+
+.navbar-bottom a {
+    color: #64748b;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.navbar-bottom a.active {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+/* DESKTOP NAV (HIDDEN BY DEFAULT) */
+.navbar-top {
+    display: none;
+}
+
+/* 💻 WHEN SCREEN IS LARGE */
+@media (min-width: 768px) {
+
+    .navbar-bottom {
+        display: none;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #020617;
+        padding: 15px 30px;
+        border-bottom: 1px solid #1f2937;
+    }
+
+    .navbar-top a {
+        color: #94a3b8;
+        margin-left: 20px;
+        text-decoration: none;
+    }
+
+    .navbar-top a.active {
+        color: #22c55e;
+        font-weight: bold;
+    }
+}
+</style>
+
 </head>
-<body>
 
-<h2>Dashboard</h2>
+<div class="navbar-top">
+    <div><b>MktIntel</b></div>
 
-<p>Total Sales: ${{ total_sales }}</p>
-<p>Total Profit: ${{ total_profit }}</p>
+    <div>
+        <a href="/dashboard" class="active">Dashboard</a>
+        <a href="/stock">Stock</a>
+        <a href="/sales">Sales</a>
+        <a href="/reports">Reports</a>
+    </div>
+</div>
 
-<canvas id="salesChart"></canvas>
+<body class="container mt-3">
+
+<h4>MktIntel</h4>
+<p class="small-text">Business Intelligence Dashboard</p>
+
+<!-- ALERT -->
+<div class="alert-box mb-3">
+⚠️ {{ low_stock }} items running low — restock soon!
+</div>
+
+<div class="card mt-3">
+    <div class="small-text">Smart Insight</div>
+    <div class="metric">{{ insight }}</div>
+</div>
+
+<div class="card mt-2">
+    <div class="small-text">Top Product</div>
+    <div class="metric">{{ best_product }}</div>
+</div>
+
+<!-- METRICS -->
+<div class="row g-2">
+
+<div class="col-6">
+<div class="card p-3 bg-light text-dark">
+<div class="small-text">Today's Revenue</div>
+<div class="metric">${{ total_sales }}</div>
+</div>
+</div>
+
+<div class="col-6">
+<div class="card p-3 bg-light text-dark">
+<div class="small-text">Today's Profit</div>
+<div class="metric">${{ total_profit }}</div>
+</div>
+</div>
+
+<div class="col-6">
+<div class="card p-3 bg-light text-dark">
+<div class="small-text">Items in Stock</div>
+<div class="metric">{{ low_stock }}</div>
+</div>
+</div>
+
+<div class="col-6">
+<div class="card p-3 bg-light text-dark">
+<div class="small-text">Sales Activity</div>
+<div class="metric">Active</div>
+</div>
+</div>
+
+</div>
+
+<br>
+
+<!-- BAR GRAPH -->
+<h6 class="small-text">Weekly Sales Trend</h6>
+<canvas id="chart"></canvas>
 
 <script>
-    const ctx = document.getElementById('salesChart');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {{ dates|tojson }},
-            datasets: [
-                {
-                    label: 'Sales',
-                    data: {{ sales_data|tojson }},
-                    borderWidth: 2
-                },
-                {
-                    label: 'Profit',
-                    data: {{ profit_data|tojson }},
-                    borderWidth: 2
-                }
-            ]
-        }
-    });
+new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+        labels: {{ dates|tojson }},
+        datasets: [{
+            label: 'Sales',
+            data: {{ sales_data|tojson }},
+            backgroundColor: '#22c55e',
+            borderRadius: 8
+        }]
+    }
+});
 </script>
 
-<h3>🔥 Best Selling Products</h3>
+<!-- STOCK PREVIEW -->
+<br>
+<h6 class="small-text">Stock Levels</h6>
 
-<ul>
-    {% for name, qty in best_products %}
-        <li>{{ name }} - {{ qty }} sold</li>
-    {% endfor %}
-</ul>
+{% for p in products[:5] %}
+<div class="d-flex justify-content-between mb-1">
+<span>{{ p.name }}</span>
 
-<a href="/report">Download PDF Report</a>
+{% if p.quantity <= p.min_stock %}
+<span class="text-warning">{{ p.quantity }} left</span>
+{% else %}
+<span class="text-success">OK</span>
+{% endif %}
+</div>
+{% endfor %}
 
-<a href="/">Back</a>
+<!-- NAV -->
+<div class="navbar-bottom">
+<a href="/dashboard" class="active">🏠</a>
+<a href="/stock">📦</a>
+<a href="/sales">💰</a>
+<a href="/reports">📄</a>
+</div>
+
+<script>
+document.querySelectorAll('.card').forEach(card => {
+    card.style.opacity = 0;
+    card.style.transform = "translateY(10px)";
+    setTimeout(() => {
+        card.style.transition = "0.4s";
+        card.style.opacity = 1;
+        card.style.transform = "translateY(0)";
+    }, 100);
+});
+</script>
+
+<script>
+const links = document.querySelectorAll('.navbar-top a, .navbar-bottom a');
+const current = window.location.pathname;
+
+links.forEach(link => {
+    if(link.getAttribute('href') === current){
+        link.classList.add('active');
+    }
+});
+</script>
 
 </body>
 </html>
