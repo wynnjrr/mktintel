@@ -76,6 +76,39 @@ input::placeholder {
     color: #22c55e;
     font-weight: bold;
 }
+
+/* DESKTOP NAV (HIDDEN BY DEFAULT) */
+.navbar-top {
+    display: none;
+}
+
+/* 💻 WHEN SCREEN IS LARGE */
+@media (min-width: 768px) {
+
+    .navbar-bottom {
+        display: none;
+    }
+
+    .navbar-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #020617;
+        padding: 15px 30px;
+        border-bottom: 1px solid #1f2937;
+    }
+
+    .navbar-top a {
+        color: #94a3b8;
+        margin-left: 20px;
+        text-decoration: none;
+    }
+
+    .navbar-top a.active {
+        color: #22c55e;
+        font-weight: bold;
+    }
+}
 </style>
 
 </head>
