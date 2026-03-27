@@ -11,14 +11,17 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'DATABASE_URL',
-    'sqlite:///database.db'
-)
+db_url = os.environ.get("DATABASE_URL")
+
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///database.db'
 
 db.init_app(app)
 
 with app.app_context():
+    db.drop_all()   # wipes old schema (safe for now)
     db.create_all()
 
 # ================= LOGIN REQUIRED =================
