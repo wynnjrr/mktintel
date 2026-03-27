@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///database.db'
 db.init_app(app)
 
 with app.app_context():
-    db.drop_all()   # wipes old schema (safe for now)
     db.create_all()
 
 # ================= LOGIN REQUIRED =================
