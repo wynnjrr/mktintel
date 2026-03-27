@@ -2,6 +2,10 @@
 <html>
 <head>
     <title>Reports</title>
+    <meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 <meta name="theme-color" content="#22c55e">
@@ -14,45 +18,42 @@ body {
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* HEADER */
-h4 {
-    font-weight: 600;
+/* FORCE TEXT VISIBILITY */
+h1, h2, h3, h4, h5, h6, p, span, label {
+    color: #e2e8f0 !important;
 }
 
 /* CARDS */
 .card {
     background: #111827;
     border-radius: 16px;
-    padding: 15px;
     border: none;
     box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-/* METRICS */
-.metric {
-    font-size: 20px;
-    font-weight: bold;
+/* INPUTS FIX */
+input, select, textarea {
+    background: #020617 !important;
+    border: 1px solid #1f2937 !important;
+    color: #e2e8f0 !important;
 }
 
-.small-text {
-    font-size: 12px;
-    color: #94a3b8;
-}
-
-/* ALERT */
-.alert-box {
-    background: #1f2937;
-    border-left: 4px solid #f59e0b;
-    padding: 12px;
-    border-radius: 10px;
+/* PLACEHOLDER */
+input::placeholder {
+    color: #64748b !important;
 }
 
 /* BUTTONS */
-.btn {
-    border-radius: 10px;
+.btn-primary {
+    background: #22c55e;
+    border: none;
 }
 
-/* MOBILE NAV (DEFAULT) */
+.btn-primary:hover {
+    background: #16a34a;
+}
+
+/* NAV */
 .navbar-bottom {
     position: fixed;
     bottom: 0;
@@ -73,39 +74,6 @@ h4 {
 .navbar-bottom a.active {
     color: #22c55e;
     font-weight: bold;
-}
-
-/* DESKTOP NAV (HIDDEN BY DEFAULT) */
-.navbar-top {
-    display: none;
-}
-
-/* 💻 WHEN SCREEN IS LARGE */
-@media (min-width: 768px) {
-
-    .navbar-bottom {
-        display: none;
-    }
-
-    .navbar-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #020617;
-        padding: 15px 30px;
-        border-bottom: 1px solid #1f2937;
-    }
-
-    .navbar-top a {
-        color: #94a3b8;
-        margin-left: 20px;
-        text-decoration: none;
-    }
-
-    .navbar-top a.active {
-        color: #22c55e;
-        font-weight: bold;
-    }
 }
 </style>
 </head>

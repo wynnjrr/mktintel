@@ -2,6 +2,10 @@
 <html>
 <head>
 <title>Register - MktIntel</title>
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
 <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 <meta name="theme-color" content="#22c55e">
@@ -11,52 +15,65 @@
 body {
     background: linear-gradient(180deg, #0b1220, #020617);
     color: #e2e8f0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     font-family: 'Segoe UI', sans-serif;
 }
 
+/* FORCE TEXT VISIBILITY */
+h1, h2, h3, h4, h5, h6, p, span, label {
+    color: #e2e8f0 !important;
+}
+
+/* CARDS */
 .card {
     background: #111827;
-    border-radius: 18px;
-    padding: 25px;
-    width: 100%;
-    max-width: 350px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-input {
+/* INPUTS FIX */
+input, select, textarea {
     background: #020617 !important;
     border: 1px solid #1f2937 !important;
-    color: white !important;
+    color: #e2e8f0 !important;
 }
 
+/* PLACEHOLDER */
 input::placeholder {
-    color: #64748b;
+    color: #64748b !important;
 }
 
-.btn-success {
+/* BUTTONS */
+.btn-primary {
     background: #22c55e;
     border: none;
 }
 
-.btn-success:hover {
+.btn-primary:hover {
     background: #16a34a;
 }
 
-.logo {
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 22px;
-    font-weight: bold;
+/* NAV */
+.navbar-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #020617;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    border-top: 1px solid #1f2937;
 }
 
-.small-text {
+.navbar-bottom a {
+    color: #64748b;
     font-size: 13px;
-    color: #94a3b8;
-    text-align: center;
+    text-decoration: none;
+}
+
+.navbar-bottom a.active {
+    color: #22c55e;
+    font-weight: bold;
 }
 </style>
 </head>

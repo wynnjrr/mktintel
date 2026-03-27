@@ -2,78 +2,80 @@
 <html>
 <head>
     <title>Stock</title>
+    <meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 <meta name="theme-color" content="#22c55e">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-    body {
-        background: linear-gradient(180deg, #0f172a, #020617);
-        color: white;
-    }
+body {
+    background: linear-gradient(180deg, #0b1220, #020617);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', sans-serif;
+}
 
-    .card {
-        border-radius: 18px;
-        background: #1e293b;
-    }
+/* FORCE TEXT VISIBILITY */
+h1, h2, h3, h4, h5, h6, p, span, label {
+    color: #e2e8f0 !important;
+}
 
-    /* MOBILE NAV (DEFAULT) */
-    .navbar-bottom {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        background: #020617;
-        display: flex;
-        justify-content: space-around;
-        padding: 10px;
-        border-top: 1px solid #1f2937;
-    }
+/* CARDS */
+.card {
+    background: #111827;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
 
-    .navbar-bottom a {
-        color: #64748b;
-        font-size: 13px;
-        text-decoration: none;
-    }
+/* INPUTS FIX */
+input, select, textarea {
+    background: #020617 !important;
+    border: 1px solid #1f2937 !important;
+    color: #e2e8f0 !important;
+}
 
-    .navbar-bottom a.active {
-        color: #22c55e;
-        font-weight: bold;
-    }
+/* PLACEHOLDER */
+input::placeholder {
+    color: #64748b !important;
+}
 
-    /* DESKTOP NAV (HIDDEN BY DEFAULT) */
-    .navbar-top {
-        display: none;
-    }
+/* BUTTONS */
+.btn-primary {
+    background: #22c55e;
+    border: none;
+}
 
-    /* 💻 WHEN SCREEN IS LARGE */
-    @media (min-width: 768px) {
+.btn-primary:hover {
+    background: #16a34a;
+}
 
-        .navbar-bottom {
-            display: none;
-        }
+/* NAV */
+.navbar-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #020617;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    border-top: 1px solid #1f2937;
+}
 
-        .navbar-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #020617;
-            padding: 15px 30px;
-            border-bottom: 1px solid #1f2937;
-        }
+.navbar-bottom a {
+    color: #64748b;
+    font-size: 13px;
+    text-decoration: none;
+}
 
-        .navbar-top a {
-            color: #94a3b8;
-            margin-left: 20px;
-            text-decoration: none;
-        }
-
-        .navbar-top a.active {
-            color: #22c55e;
-            font-weight: bold;
-        }
-    }
-    </style>
+.navbar-bottom a.active {
+    color: #22c55e;
+    font-weight: bold;
+}
+</style>
 </head>
 
 <div class="navbar-top">
