@@ -7,6 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 import os
 from collections import Counter
 from functools import wraps
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -46,26 +47,48 @@ def dashboard():
     total_sales = sum(s.total_price for s in sales)
     total_profit = sum(s.profit for s in sales)
 
-    dates = [s.date.strftime("%Y-%m-%d") for s in sales]
-    sales_data = [s.total_price for s in sales]
+    # 📊 DAILY SALES (BAR CHART)
+    daily_sales = {}
+    for s in sales:
+        day = s.date.strftime("%Y-%m-%d")
+        daily_sales[day] = daily_sales.get(day, 0) + s.total_price
 
+    sorted_sales = sorted(daily_sales.items())
+
+    dates = [d[0] for d in sorted_sales]
+    sales_data = [d[1] for d in sorted_sales]
+
+    # 📉 LOW STOCK
     low_stock = len([p for p in products if p.quantity <= p.min_stock])
 
-    # BEST SELLER
-    product_sales = Counter()
+    # 🔥 BEST SELLER
+    product_sales = {}
     for s in sales:
-        product = Product.query.get(s.product_id)
+        product = db.session.get(Product, s.product_id)
         if product:
-            product_sales[product.name] += s.quantity_sold
+            product_sales[product.name] = product_sales.get(product.name, 0) + s.quantity_sold
 
     best_product = max(product_sales, key=product_sales.get) if product_sales else "N/A"
 
-    # INSIGHT
-    insight = "Good performance"
+    # 📆 WEEKLY COMPARISON
+    today = datetime.now()
+    last_7_days = today - timedelta(days=7)
+    prev_7_days = today - timedelta(days=14)
+
+    current_week_sales = sum(s.total_price for s in sales if s.date >= last_7_days)
+    previous_week_sales = sum(s.total_price for s in sales if prev_7_days <= s.date < last_7_days)
+
+    # 🧠 SMART INSIGHTS
+    insight = "📊 Keep pushing sales!"
+    if current_week_sales > previous_week_sales:
+        insight = "🔥 Sales increased this week!"
+    elif current_week_sales < previous_week_sales:
+        insight = "⚠️ Sales dropped this week"
+
     if total_profit > 100:
-        insight = "🔥 Strong profit growth!"
+        insight += " 💰 Strong profit growth!"
     elif total_profit < 20:
-        insight = "⚠️ Profit is low, increase sales"
+        insight += " ⚠️ Low profit margins"
 
     return render_template(
         "dashboard.html",
@@ -74,9 +97,9 @@ def dashboard():
         dates=dates,
         sales_data=sales_data,
         low_stock=low_stock,
-        products=products,
         best_product=best_product,
-        insight=insight
+        insight=insight,
+        products=products
     )
 
 
@@ -235,22 +258,51 @@ def report():
     styles = getSampleStyleSheet()
 
     elements = []
-    elements.append(Paragraph("MktIntel Financial Report", styles['Title']))
-    elements.append(Spacer(1, 10))
 
     user_id = session.get('user_id')
     sales = Sale.query.filter_by(user_id=user_id).all()
+    products = Product.query.filter_by(user_id=user_id).all()
 
     total_sales = sum(s.total_price for s in sales)
     total_profit = sum(s.profit for s in sales)
 
+    # TITLE
+    elements.append(Paragraph("MktIntel Business Report", styles['Title']))
+    elements.append(Spacer(1, 12))
+
+    # SUMMARY
     elements.append(Paragraph(f"Total Sales: ${total_sales}", styles['Normal']))
     elements.append(Paragraph(f"Total Profit: ${total_profit}", styles['Normal']))
+    elements.append(Spacer(1, 12))
+
+    # PRODUCTS
+    elements.append(Paragraph("Stock Overview:", styles['Heading2']))
+    for p in products:
+        elements.append(Paragraph(f"{p.name} - {p.quantity} units", styles['Normal']))
+
+    elements.append(Spacer(1, 12))
+
+    # SALES DETAILS
+    elements.append(Paragraph("Sales History:", styles['Heading2']))
+    for s in sales:
+        elements.append(Paragraph(
+            f"Product ID {s.product_id} | Qty: {s.quantity_sold} | ${s.total_price}",
+            styles['Normal']
+        ))
+
+    # INSIGHT
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph("Insights:", styles['Heading2']))
+
+    if total_profit > 100:
+        elements.append(Paragraph("Strong business performance", styles['Normal']))
+    else:
+        elements.append(Paragraph("Increase sales for better profit", styles['Normal']))
 
     doc.build(elements)
     buffer.seek(0)
 
-    return send_file(buffer, as_attachment=True, download_name="report.pdf")
+    return send_file(buffer, as_attachment=True, download_name="mktintel_report.pdf")
 
 
 if __name__ == "__main__":

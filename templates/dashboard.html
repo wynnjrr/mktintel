@@ -1,263 +1,282 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>MktIntel</title>
-<meta name="theme-color" content="#020617">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#22c55e">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>MktIntel</title>
 
-<style>
-body {
-    background: linear-gradient(180deg, #0b1220, #020617);
-    color: #e2e8f0;
-    font-family: 'Segoe UI', sans-serif;
-}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
-/* FORCE TEXT VISIBILITY */
-h1, h2, h3, h4, h5, h6, p, span, label {
-    color: #e2e8f0 !important;
-}
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
-/* CARDS */
-.card {
-    background: #111827;
-    border-radius: 16px;
-    border: none;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-/* INPUTS FIX */
-input, select, textarea {
-    background: #020617 !important;
-    border: 1px solid #1f2937 !important;
-    color: #e2e8f0 !important;
-}
-
-/* PLACEHOLDER */
-input::placeholder {
-    color: #64748b !important;
-}
-
-/* BUTTONS */
-.btn-primary {
-    background: #22c55e;
-    border: none;
-}
-
-.btn-primary:hover {
-    background: #16a34a;
-}
-
-/* NAV */
-.navbar-bottom {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: #020617;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    border-top: 1px solid #1f2937;
-}
-
-.navbar-bottom a {
-    color: #64748b;
-    font-size: 13px;
-    text-decoration: none;
-}
-
-.navbar-bottom a.active {
-    color: #22c55e;
-    font-weight: bold;
-}
-
-/* DESKTOP NAV (HIDDEN BY DEFAULT) */
-.navbar-top {
-    display: none;
-}
-
-/* 💻 WHEN SCREEN IS LARGE */
-@media (min-width: 768px) {
-
-    .navbar-bottom {
-        display: none;
-    }
-
-    .navbar-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #020617;
-        padding: 15px 30px;
-        border-bottom: 1px solid #1f2937;
-    }
-
-    .navbar-top a {
-        color: #94a3b8;
-        margin-left: 20px;
-        text-decoration: none;
-    }
-
-    .navbar-top a.active {
-        color: #22c55e;
-        font-weight: bold;
-    }
-}
-</style>
-
+    <style>
+        body {
+            background: linear-gradient(180deg, #0b1220, #020617);
+            color: #e2e8f0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        /* TEXT */
+        
+        .small-text {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        
+        .metric {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        /* CARDS */
+        
+        .card {
+            background: #7f8592;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 6px 20px rgba(125, 88, 88, 0.4);
+        }
+        /* ALERT */
+        
+        .alert-box {
+            background: rgba(234, 179, 8, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            color: #facc15;
+        }
+        /* NAV MOBILE */
+        
+        .navbar-bottom {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #020617;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid #1f2937;
+        }
+        
+        .navbar-bottom a {
+            color: #64748b;
+            font-size: 13px;
+            text-decoration: none;
+        }
+        
+        .navbar-bottom a.active {
+            color: #22c55e;
+        }
+        /* NAV DESKTOP */
+        
+        .navbar-top {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .navbar-bottom {
+                display: none;
+            }
+            .navbar-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #020617;
+                padding: 15px 30px;
+                border-bottom: 1px solid #1f2937;
+            }
+            .navbar-top a {
+                color: #94a3b8;
+                margin-left: 20px;
+                text-decoration: none;
+            }
+            .navbar-top a.active {
+                color: #22c55e;
+                font-weight: bold;
+            }
+        }
+    </style>
 </head>
 
-<div class="d-flex align-items-center mb-3">
-    <img src="{{ url_for('static', filename='logo.png') }}" width="40">
-    <h5 class="ms-2">MktIntel</h5>
-</div>
+<body>
 
-<div class="navbar-top">
-    <div><b>MktIntel</b></div>
+    <!-- TOP NAV -->
+    <div class="navbar-top">
+        <div><b>MktIntel</b></div>
 
-    <span style="color:#94a3b8; margin-right:10px;">
-    👤 {{ session.user_id }}
-</span>
+        <span style="color:#94a3b8;">👤 {{ session.user_id }}</span>
 
-    <div>
-        <a href="/dashboard" class="active">Dashboard</a>
-        <a href="/stock">Stock</a>
-        <a href="/sales">Sales</a>
-        <a href="/reports">Reports</a>
-        <a href="/logout" style="color:#ef4444;">Logout</a>
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stock">Stock</a>
+            <a href="/sales">Sales</a>
+            <a href="/reports">Reports</a>
+            <a href="/logout" style="color:#ef4444;">Logout</a>
+        </div>
     </div>
-</div>
 
-<body class="container mt-3">
+    <div class="container mt-3 mb-5">
 
-<p class="small-text">Business Intelligence Dashboard</p>
+        <!-- HEADER -->
+        <div class="d-flex align-items-center mb-3">
+            <img src="{{ url_for('static', filename='logo.png') }}" width="40">
+            <h5 class="ms-2">MktIntel</h5>
+        </div>
 
-<!-- ALERT -->
-<div class="alert-box mb-3">
-⚠️ {{ low_stock }} items running low — restock soon!
-</div>
+        <p class="small-text">Business Intelligence Dashboard</p>
 
-<div class="card mt-3">
-    <div class="small-text">Smart Insight</div>
-    <div class="metric">{{ insight }}</div>
-</div>
+        <!-- INSIGHT -->
+        <div class="card p-3 mb-2">
+            <div class="small-text">Smart Insight</div>
+            <div class="metric">{{ insight }}</div>
+        </div>
 
-<div class="card mt-2">
-    <div class="small-text">Top Product</div>
-    <div class="metric">{{ best_product }}</div>
-</div>
+        <div class="card p-3 mb-3">
+            <div class="small-text">Top Product</div>
+            <div class="metric">{{ best_product }}</div>
+        </div>
 
-<!-- METRICS -->
-<div class="row g-2">
+        <!-- KPI -->
+        <div class="row text-center">
 
-<div class="col-6">
-<div class="card p-3 bg-light text-dark">
-<div class="small-text">Today's Revenue</div>
-<div class="metric">${{ total_sales }}</div>
-</div>
-</div>
+            <div class="col-6 mb-3">
+                <div class="card p-3">
+                    <h6>Total Sales</h6>
+                    <h4>${{ total_sales }}</h4>
+                </div>
+            </div>
 
-<div class="col-6">
-<div class="card p-3 bg-light text-dark">
-<div class="small-text">Today's Profit</div>
-<div class="metric">${{ total_profit }}</div>
-</div>
-</div>
+            <div class="col-6 mb-3">
+                <div class="card p-3">
+                    <h6>Total Profit</h6>
+                    <h4>${{ total_profit }}</h4>
+                </div>
+            </div>
 
-<div class="col-6">
-<div class="card p-3 bg-light text-dark">
-<div class="small-text">Items in Stock</div>
-<div class="metric">{{ low_stock }}</div>
-</div>
-</div>
+            <div class="col-6 mb-3">
+                <div class="card p-3">
+                    <h6>Low Stock</h6>
+                    <h4>{{ low_stock }}</h4>
+                </div>
+            </div>
 
-<div class="col-6">
-<div class="card p-3 bg-light text-dark">
-<div class="small-text">Sales Activity</div>
-<div class="metric">Active</div>
-</div>
-</div>
+            <div class="col-6 mb-3">
+                <div class="card p-3">
+                    <h6>Best Product</h6>
+                    <h6>{{ best_product }}</h6>
+                </div>
+            </div>
 
-</div>
+        </div>
 
-<br>
+        <!-- CHART -->
+        <h6 class="small-text">Sales Trend</h6>
+        <div class="card p-3 mb-3">
+            <canvas id="salesChart"></canvas>
+        </div>
 
-<!-- BAR GRAPH -->
-<h6 class="small-text">Weekly Sales Trend</h6>
-<canvas id="chart"></canvas>
+        <!-- CHART SCRIPT (SAFE) -->
+        <script>
+            const dates = {{dates | tojson | safe}};
+            const salesData = {{sales_data | tojson | safe}};
 
-<script>
-new Chart(document.getElementById('chart'), {
-    type: 'bar',
-    data: {
-        labels: {{ dates|tojson }},
-        datasets: [{
-            label: 'Sales',
-            data: {{ sales_data|tojson }},
-            backgroundColor: '#22c55e',
-            borderRadius: 8
-        }]
-    }
-});
-</script>
+            if (dates.length > 0) {
+                new Chart(document.getElementById('salesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Daily Sales',
+                            data: salesData,
+                            backgroundColor: "rgba(34, 197, 94, 0.7)",
+                            hoverBackgroundColor: "#22c55e",
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: "white"
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: "white"
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: "white"
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('salesChart').outerHTML =
+                    "<p class='text-center text-muted'>No sales yet 📊</p>";
+            }
+        </script>
 
-<!-- STOCK PREVIEW -->
-<br>
-<h6 class="small-text">Stock Levels</h6>
+        <!-- STOCK PREVIEW -->
+        <h6 class="small-text">Stock Levels</h6>
 
-{% for p in products[:5] %}
-<div class="d-flex justify-content-between mb-1">
-<span>{{ p.name }}</span>
+        {% for p in products[:5] %}
+        <div class="d-flex justify-content-between mb-1">
+            <span>{{ p.name }}</span> {% if p.quantity
+            <= p.min_stock %} <span class="text-warning">{{ p.quantity }} left</span>
+                {% else %}
+                <span class="text-success">OK</span> {% endif %}
+        </div>
+        {% endfor %}
 
-{% if p.quantity <= p.min_stock %}
-<span class="text-warning">{{ p.quantity }} left</span>
-{% else %}
-<span class="text-success">OK</span>
-{% endif %}
-</div>
-{% endfor %}
+        <!-- LOGOUT BUTTON (MOBILE) -->
+        <div class="text-center mt-3">
+            <a href="/logout" class="btn btn-outline-danger w-100">Logout</a>
+        </div>
 
-<!-- NAV -->
- <div class="text-center mt-3">
-    <a href="/logout" class="btn btn-outline-danger w-100">Logout</a>
-</div>
+    </div>
 
-<div class="navbar-bottom">
-<a href="/dashboard" class="active">🏠</a>
-<a href="/stock">📦</a>
-<a href="/sales">💰</a>
-<a href="/reports">📄</a>
-<a href="/logout">🚪</a>
-</div>
+    <!-- BOTTOM NAV -->
+    <div class="navbar-bottom">
+        <a href="/dashboard">🏠</a>
+        <a href="/stock">📦</a>
+        <a href="/sales">💰</a>
+        <a href="/reports">📄</a>
+        <a href="/logout">🚪</a>
+    </div>
 
-<script>
-document.querySelectorAll('.card').forEach(card => {
-    card.style.opacity = 0;
-    card.style.transform = "translateY(10px)";
-    setTimeout(() => {
-        card.style.transition = "0.4s";
-        card.style.opacity = 1;
-        card.style.transform = "translateY(0)";
-    }, 100);
-});
-</script>
+    <!-- ANIMATION -->
+    <script>
+        document.querySelectorAll('.card').forEach((card, i) => {
+            card.style.opacity = 0;
+            card.style.transform = "translateY(10px)";
+            setTimeout(() => {
+                card.style.transition = "0.4s";
+                card.style.opacity = 1;
+                card.style.transform = "translateY(0)";
+            }, i * 100);
+        });
+    </script>
 
-<script>
-const links = document.querySelectorAll('.navbar-top a, .navbar-bottom a');
-const current = window.location.pathname;
+    <!-- ACTIVE NAV -->
+    <script>
+        const links = document.querySelectorAll('.navbar-top a, .navbar-bottom a');
+        const current = window.location.pathname;
 
-links.forEach(link => {
-    if(link.getAttribute('href') === current){
-        link.classList.add('active');
-    }
-});
-</script>
+        links.forEach(link => {
+            if (link.getAttribute('href') === current) {
+                link.classList.add('active');
+            }
+        });
+    </script>
 
 </body>
+
 </html>
