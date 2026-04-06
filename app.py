@@ -174,8 +174,10 @@ def add_product():
     user_id = session.get('user_id')
 
     name = request.form['name']
-    buying_price = float(request.form['buying_price'])
-    selling_price = float(request.form['selling_price'])
+
+    buying_price = float(request.form['buying_price'].replace(',', '.'))
+    selling_price = float(request.form['selling_price'].replace(',', '.'))
+
     quantity = int(request.form['quantity'])
     min_stock = int(request.form['min_stock'])
 
