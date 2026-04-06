@@ -67,8 +67,16 @@ input::placeholder {
 
 .navbar-bottom a {
     color: #64748b;
-    font-size: 13px;
+    font-size: 20px;
     text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.navbar-bottom a span {
+    font-size: 11px;
+    margin-top: 2px;
 }
 
 .navbar-bottom a.active {
@@ -115,6 +123,21 @@ input::placeholder {
 
 <h4>📄 Reports</h4>
 
+<!-- TOP NAV -->
+    <div class="navbar-top">
+        <div><b>MktIntel</b></div>
+
+        <span style="color:#94a3b8;">👤 {{ session.user_id }}</span>
+
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stock">Stock</a>
+            <a href="/sales">Sales</a>
+            <a href="/reports">Reports</a>
+            <a href="/logout" style="color:#ef4444;">Logout</a>
+        </div>
+    </div>
+
 <div class="card p-3">
     <h5>Financial Summary</h5>
     <p>Download your business performance report.</p>
@@ -135,10 +158,10 @@ input::placeholder {
 </div>
 
 <div class="navbar-bottom">
-    <a href="/dashboard">🏠</a>
-    <a href="/stock">📦</a>
-    <a href="/sales">💰</a>
-    <a href="/reports" class="active">📄</a>
+    <a href="/dashboard">🏠<span>Home</span></a>
+    <a href="/sales">💰<span>Sales</span></a>
+    <a href="/stock">📦<span>Stock</span></a>
+    <a href="/reports" class="active">📄<span>Reports</span></a>
 </div>
 
 <script>

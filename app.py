@@ -8,6 +8,7 @@ import os
 from collections import Counter
 from functools import wraps
 from datetime import datetime, timedelta
+from reportlab.platypus import Image
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -254,55 +255,120 @@ def delete(id):
 @login_required
 def report():
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer)
-    styles = getSampleStyleSheet()
 
+    doc = SimpleDocTemplate(
+        buffer,
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=40
+    )
+
+    styles = getSampleStyleSheet()
     elements = []
 
     user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
     sales = Sale.query.filter_by(user_id=user_id).all()
     products = Product.query.filter_by(user_id=user_id).all()
 
     total_sales = sum(s.total_price for s in sales)
     total_profit = sum(s.profit for s in sales)
 
-    # TITLE
+    # ================= HEADER =================`
+    logo = "static/logo.png"
+    elements.append(Image(logo, width=80, height=40))
+    elements.append(Spacer(1, 6))
     elements.append(Paragraph("MktIntel Business Report", styles['Title']))
+    elements.append(Spacer(1, 6))
+
+    elements.append(Paragraph(
+        f"User: <b>{user.username}</b>",
+        styles['Normal']
+    ))
+
+    elements.append(Paragraph(
+        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        styles['Normal']
+    ))
+
     elements.append(Spacer(1, 12))
 
-    # SUMMARY
-    elements.append(Paragraph(f"Total Sales: ${total_sales}", styles['Normal']))
-    elements.append(Paragraph(f"Total Profit: ${total_profit}", styles['Normal']))
+    # ================= SUMMARY =================
+    elements.append(Paragraph("Financial Summary", styles['Heading2']))
+    elements.append(Spacer(1, 6))
+
+    elements.append(Paragraph(
+        f"Total Sales: <b>${total_sales}</b>",
+        styles['Normal']
+    ))
+
+    elements.append(Paragraph(
+        f"Total Profit: <b>${total_profit}</b>",
+        styles['Normal']
+    ))
+
     elements.append(Spacer(1, 12))
 
-    # PRODUCTS
-    elements.append(Paragraph("Stock Overview:", styles['Heading2']))
+    # ================= SALES =================
+    elements.append(Paragraph("Sales History", styles['Heading2']))
+    elements.append(Spacer(1, 6))
+
+    if not sales:
+        elements.append(Paragraph("No sales recorded", styles['Normal']))
+    else:
+        for s in sales:
+            product = Product.query.get(s.product_id)
+            name = product.name if product else "Deleted Product"
+
+            elements.append(Paragraph(
+                f"{s.date.strftime('%Y-%m-%d')} | "
+                f"{name} | "
+                f"Qty: {s.quantity_sold} | "
+                f"Sales: ${s.total_price} | "
+                f"Profit: ${s.profit}",
+                styles['Normal']
+            ))
+
+    elements.append(Spacer(1, 12))
+
+    # ================= STOCK =================
+    elements.append(Paragraph("Stock Summary", styles['Heading2']))
+    elements.append(Spacer(1, 6))
+
     for p in products:
-        elements.append(Paragraph(f"{p.name} - {p.quantity} units", styles['Normal']))
+        status = "LOW STOCK" if p.quantity <= p.min_stock else "OK"
 
-    elements.append(Spacer(1, 12))
-
-    # SALES DETAILS
-    elements.append(Paragraph("Sales History:", styles['Heading2']))
-    for s in sales:
         elements.append(Paragraph(
-            f"Product ID {s.product_id} | Qty: {s.quantity_sold} | ${s.total_price}",
+            f"{p.name} — {p.quantity} units "
+            f"(Min: {p.min_stock}) — {status}",
             styles['Normal']
         ))
 
-    # INSIGHT
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Insights:", styles['Heading2']))
+
+    # ================= INSIGHTS =================
+    elements.append(Paragraph("Business Insights", styles['Heading2']))
+    elements.append(Spacer(1, 6))
 
     if total_profit > 100:
-        elements.append(Paragraph("Strong business performance", styles['Normal']))
+        insight = "Strong profitability"
+    elif total_profit < 20:
+        insight = "Low profit margin"
     else:
-        elements.append(Paragraph("Increase sales for better profit", styles['Normal']))
+        insight = "Stable performance"
+
+    elements.append(Paragraph(insight, styles['Normal']))
 
     doc.build(elements)
     buffer.seek(0)
 
-    return send_file(buffer, as_attachment=True, download_name="mktintel_report.pdf")
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="MktIntel_Report.pdf"
+    )
 
 
 if __name__ == "__main__":

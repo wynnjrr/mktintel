@@ -67,8 +67,16 @@ input::placeholder {
 
 .navbar-bottom a {
     color: #64748b;
-    font-size: 13px;
+    font-size: 20px;
     text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.navbar-bottom a span {
+    font-size: 11px;
+    margin-top: 2px;
 }
 
 .navbar-bottom a.active {
@@ -116,8 +124,8 @@ input::placeholder {
 
     <div>
         <a href="/dashboard" class="active">Dashboard</a>
-        <a href="/stock">Stock</a>
         <a href="/sales">Sales</a>
+        <a href="/stock">Stock</a>
         <a href="/reports">Reports</a>
     </div>
 </div>
@@ -141,10 +149,10 @@ input::placeholder {
 {% endfor %}
 
 <div class="navbar-bottom">
-    <a href="/dashboard">🏠</a>
-    <a href="/stock">📦</a>
-    <a href="/sales" class="active">💰</a>
-    <a href="/reports">📄</a>
+    <a href="/dashboard">🏠<span>Home</span></a>
+    <a href="/sales">💰<span>Sales</span></a>
+    <a href="/stock">📦<span>Stock</span></a>
+    <a href="/reports" class="active">📄<span>Reports</span></a>
 </div>
 
 <script>
