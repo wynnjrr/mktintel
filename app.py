@@ -11,7 +11,10 @@ from datetime import datetime, timedelta
 from reportlab.platypus import Image
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+
+LOGIN_ROUTE = "/login"
+STOCK_ROUTE = "/stock"
 
 db_url = os.environ.get("DATABASE_URL")
 
@@ -30,14 +33,14 @@ def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not session.get('user_id'):
-            return redirect('/login')
+            return redirect(LOGIN_ROUTE)
         return func(*args, **kwargs)
     return wrapper
 
 
 # ================= DASHBOARD =================
-@app.route('/')
-@app.route('/dashboard')
+@app.route('/', methods=['GET'])
+@app.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
     user_id = session.get('user_id')
@@ -64,10 +67,16 @@ def dashboard():
 
     # 🔥 BEST SELLER
     product_sales = {}
+
     for s in sales:
         product = db.session.get(Product, s.product_id)
         if product:
             product_sales[product.name] = product_sales.get(product.name, 0) + s.quantity_sold
+
+    sorted_products = sorted(product_sales.items(), key=lambda x: x[1], reverse=True)
+
+    product_names = [p[0] for p in sorted_products]
+    product_quantities = [p[1] for p in sorted_products]
 
     best_product = max(product_sales, key=product_sales.get) if product_sales else "N/A"
 
@@ -100,7 +109,10 @@ def dashboard():
         low_stock=low_stock,
         best_product=best_product,
         insight=insight,
-        products=products
+        products=products,
+        product_names=product_names,
+        product_quantities=product_quantities,
+        username=session.get('username')
     )
 
 
@@ -115,6 +127,7 @@ def login():
 
         if user:
             session['user_id'] = user.id
+            session['username'] = user.username
             return redirect('/dashboard')
 
     return render_template("login.html")
@@ -130,20 +143,20 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        return redirect('/login')
+        return redirect(LOGIN_ROUTE)
 
     return render_template("register.html")
 
 
 # ================= LOGOUT =================
-@app.route('/logout')
+@app.route('/logout', methods=['GET'])
 def logout():
     session.clear()
-    return redirect('/login')
+    return redirect(LOGIN_ROUTE)
 
 
 # ================= STOCK =================
-@app.route('/stock')
+@app.route(STOCK_ROUTE, methods=['GET'])
 @login_required
 def stock():
     user_id = session.get('user_id')
@@ -152,7 +165,7 @@ def stock():
 
 
 # ================= SALES =================
-@app.route('/sales')
+@app.route('/sales', methods=['GET'])
 @login_required
 def sales_page():
     user_id = session.get('user_id')
@@ -161,7 +174,7 @@ def sales_page():
 
 
 # ================= REPORTS =================
-@app.route('/reports')
+@app.route('/reports', methods=['GET'])
 @login_required
 def reports():
     return render_template("reports.html")
@@ -197,7 +210,7 @@ def add_product():
         db.session.add(product)
 
     db.session.commit()
-    return redirect('/stock')
+    return redirect(STOCK_ROUTE)
 
 
 # ================= SELL =================
@@ -238,22 +251,22 @@ def restock(id):
         product.quantity += qty
         db.session.commit()
 
-    return redirect('/stock')
+    return redirect(STOCK_ROUTE)
 
 
 # ================= DELETE =================
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete(id):
     product = Product.query.get(id)
     if product:
         db.session.delete(product)
         db.session.commit()
-    return redirect('/stock')
+    return redirect(STOCK_ROUTE)
 
 
 # ================= PDF REPORT =================
-@app.route('/report')
+@app.route('/report', methods=['GET'])
 @login_required
 def report():
     buffer = io.BytesIO()

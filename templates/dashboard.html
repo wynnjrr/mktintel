@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xml:lang="en">
 
 <head>
     <title>MktIntel</title>
@@ -16,28 +16,50 @@
 
     <style>
         body {
-            background: linear-gradient(180deg, #0b1220, #020617);
-            color: #e2e8f0;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            color: #e5e7eb;
             font-family: 'Segoe UI', sans-serif;
         }
         /* TEXT */
+        
+        h1, h2, h3, h4, h5,
+        p, span, div, label {
+            color: #e5e7eb;
+        }
+
+        h6 {
+            color: #cbd5f5;
+        }
         
         .small-text {
             color: #94a3b8;
             font-size: 13px;
         }
+
+        .card h6,
+        .card span,
+        .card p {
+            color: #e5e7eb;
+        }
         
         .metric {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: bold;
+            color: #22c55e;
         }
         /* CARDS */
         
         .card {
-            background: #7f8592;
-            border-radius: 16px;
-            border: none;
-            box-shadow: 0 6px 20px rgba(125, 88, 88, 0.4);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            transition: 0.3s;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.8);
         }
         /* ALERT */
         
@@ -49,6 +71,10 @@
         }
         /* NAV MOBILE */
         
+        .navbar-top span {
+            color: #94a3b8 !important;
+        }
+
         .navbar-bottom {
             position: fixed;
             bottom: 0;
@@ -61,12 +87,18 @@
         }
         
         .navbar-bottom a {
-            color: #64748b;
+            color: #94a3b8;
+            transition: 0.3s;
             font-size: 22px;
             text-decoration: none;
             display: flex;
             flex-direction: column;
             align-items: center;
+        }
+
+        .navbar-bottom a:hover {
+            color: #22c55e;
+            transform: translateY(-2px);
         }
 
         .navbar-bottom a span {
@@ -75,6 +107,7 @@
         
         .navbar-bottom a.active {
             color: #22c55e;
+            text-shadow: 0 0 10px rgba(34,197,94,0.7);
         }
         /* NAV DESKTOP */
         
@@ -113,7 +146,7 @@
     <div class="navbar-top">
         <div><b>MktIntel</b></div>
 
-        <span style="color:#94a3b8;">👤 {{ session.user_id }}</span>
+        <span style="color:#94a3b8;">👤 {{ username }}</span>
 
         <div>
             <a href="/dashboard">Dashboard</a>
@@ -128,7 +161,7 @@
 
         <!-- HEADER -->
         <div class="d-flex align-items-center mb-3">
-            <img src="{{ url_for('static', filename='logo.png') }}" width="40">
+            <img src="{{ url_for('static', filename='logo.png') }}" width="40" alt="MktIntel logo">
             <h5 class="ms-2">MktIntel</h5>
         </div>
 
@@ -178,26 +211,35 @@
 
         </div>
 
-        <!-- CHART -->
+        <!--SALES CHART -->
         <h6 class="small-text">Sales Trend</h6>
         <div class="card p-3 mb-3">
             <canvas id="salesChart"></canvas>
         </div>
 
-        <!-- CHART SCRIPT (SAFE) -->
-        <script>
-            const dates = {{dates | tojson | safe}};
-            const salesData = {{sales_data | tojson | safe}};
+        <!--PRODUCT CHART-->
+        <h6 class="small-text mt-4">Product Performance</h6>
 
-            if (dates.length > 0) {
+        <div class="card p-3 mb-3">
+            <canvas id="productChart"></canvas>
+        </div>
+
+        <!--SALES CHART SCRIPT-->
+        <script type="text/javascript">
+            const salesDates = {{ dates | tojson | safe }};
+            const salesData = {{ sales_data | tojson | safe }};
+
+            if (salesDates.length > 0) {
                 new Chart(document.getElementById('salesChart'), {
                     type: 'bar',
                     data: {
-                        labels: dates,
+                        labels: salesDates,
                         datasets: [{
                             label: 'Daily Sales',
                             data: salesData,
-                            backgroundColor: "rgba(34, 197, 94, 0.7)",
+                            backgroundColor: "rgba(34,197,94,0.8)",
+                            borderColor: "#22c55e",
+                            borderWidth: 2,
                             hoverBackgroundColor: "#22c55e",
                             borderRadius: 8
                         }]
@@ -229,6 +271,49 @@
                 document.getElementById('salesChart').outerHTML =
                     "<p class='text-center text-muted'>No sales yet 📊</p>";
             }
+        </script>
+
+        <!--PRODUCT CHART-->
+        <script type="text/javascript">
+        const productNames = {{ product_names | tojson | safe }};
+        const productData = {{ product_quantities | tojson | safe }};
+
+        if (productNames.length > 0) {
+            new Chart(document.getElementById('productChart'), {
+                type: 'bar',
+                data: {
+                    labels: productNames,
+                    datasets: [{
+                        label: 'Units Sold',
+                        data: productData,
+                        backgroundColor: "rgba(59,130,246,0.8)",
+                        borderColor: "#3b82f6",
+                        borderWidth: 2,
+                        hoverBackgroundColor: "#3b82f6",
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: "white" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "white" }
+                        },
+                        y: {
+                            ticks: { color: "white" }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('productChart').outerHTML =
+                "<p class='text-center text-muted'>No product sales yet 📦</p>";
+        }
         </script>
 
         <!-- STOCK PREVIEW -->

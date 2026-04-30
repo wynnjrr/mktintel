@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xml:lang="en">
 <head>
     <title>Reports</title>
     <meta name="theme-color" content="#020617">
@@ -67,7 +67,7 @@ input::placeholder {
 
 .navbar-bottom a {
     color: #64748b;
-    font-size: 20px;
+    font-size: 22px;
     text-decoration: none;
     display: flex;
     flex-direction: column;
@@ -76,7 +76,6 @@ input::placeholder {
 
 .navbar-bottom a span {
     font-size: 11px;
-    margin-top: 2px;
 }
 
 .navbar-bottom a.active {
@@ -127,7 +126,7 @@ input::placeholder {
     <div class="navbar-top">
         <div><b>MktIntel</b></div>
 
-        <span style="color:#94a3b8;">👤 {{ session.user_id }}</span>
+        <span style="color:#94a3b8;">👤 {{ username }}</span>
 
         <div>
             <a href="/dashboard">Dashboard</a>
@@ -178,7 +177,7 @@ document.querySelectorAll('.card').forEach(card => {
 
 <script>
 const links = document.querySelectorAll('.navbar-top a, .navbar-bottom a');
-const current = window.location.pathname;
+const current = globalThis.location.pathname;
 
 links.forEach(link => {
     if(link.getAttribute('href') === current){

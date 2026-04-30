@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xml:lang="en">
 <head>
     <title>Stock</title>
     <meta name="theme-color" content="#020617">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-<meta name="theme-color" content="#22c55e">
+    <meta name="theme-color" content="#22c55e">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -194,7 +194,7 @@ document.querySelectorAll('.card').forEach(card => {
 
 <script>
 const links = document.querySelectorAll('.navbar-top a, .navbar-bottom a');
-const current = window.location.pathname;
+const current = globalThis.location.pathname;
 
 links.forEach(link => {
     if(link.getAttribute('href') === current){
