@@ -69,6 +69,26 @@
             border-radius: 10px;
             color: #facc15;
         }
+
+        .mobile-user {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(30, 41, 59, 0.95);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.05);
+            z-index: 999;
+        }
+
+        /* Hide it on desktop */
+        @media (min-width: 768px) {
+            .mobile-user {
+                display: none;
+            }
+        }
         /* NAV MOBILE */
         
         .navbar-top span {
@@ -114,18 +134,6 @@
         .navbar-top {
             display: none;
         }
-
-        .mobile-user {
-            position: absolute;
-            top: -35px;
-            right: 10px;
-            background: rgba(30, 41, 59, 0.9);
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #94a3b8;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
         
         @media (min-width: 768px) {
             .navbar-bottom {
@@ -154,6 +162,9 @@
 
 <body>
 
+    <div class="mobile-user">
+        👤 {{ username }}
+    </div>
     <!-- TOP NAV -->
     <div class="navbar-top">
         <div><b>MktIntel</b></div>
@@ -167,9 +178,6 @@
             <a href="/reports">Reports</a>
             <a href="/logout" style="color:#ef4444;">Logout</a>
 
-            <!-- USER -->
-            <div class="mobile-user">
-                👤 {{ username }}
             </div>
         </div>
     </div>
