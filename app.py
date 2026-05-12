@@ -16,9 +16,10 @@ app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 LOGIN_ROUTE = "/login"
 STOCK_ROUTE = "/stock"
 
-LOCAL_DB = "postgresql://postgres:0000@localhost:5432/mktintel"
+db_url = os.environ.get("DATABASE_URL")
 
-db_url = os.environ.get("DATABASE_URL", LOCAL_DB)
+if not db_url:
+    raise Exception("DATABASE_URL environment variable not found")
 
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
