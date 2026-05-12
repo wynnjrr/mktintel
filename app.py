@@ -16,12 +16,15 @@ app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 LOGIN_ROUTE = "/login"
 STOCK_ROUTE = "/stock"
 
-db_url = os.environ.get("DATABASE_URL")
+LOCAL_DB = "postgresql://postgres:0000@localhost:5432/mktintel"
 
-if db_url and db_url.startswith("postgres://"):
+db_url = os.environ.get("DATABASE_URL", LOCAL_DB)
+
+if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///database.db'
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
